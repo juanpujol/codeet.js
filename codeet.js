@@ -33,7 +33,7 @@ var codeet = (function () {
                             instance.target.postMessage({message: 'codeet-saved'}, self.config.codeetUrl);
                         }
 
-                        return instance.options.callback(evt.data);
+                        return instance.options.callback.call(instance, evt.data);
                     }
                 }
                 else if (evt.data.message === 'codeet-closed') {
@@ -76,7 +76,8 @@ var codeet = (function () {
                         options: options,
                         isOpened: function () {
                             return !!target.window;
-                        }
+                        },
+                        notification: self.notification
                     };
 
                     instances.push(instance);
@@ -89,6 +90,31 @@ var codeet = (function () {
                     return false;
 
                 }
+
+            },
+            notification: function () {
+
+                var instance, config;
+
+                instance = (this === self && arguments[0]) || (this.target && this);
+                config = arguments[(this === self && 1) || (this.target && 0)];
+
+                if (!instance || !instance.target) {
+                    console.warn('codeet.notification requires a valid codeet instance');
+                    return;
+                }
+
+                if (!config) {
+                    console.warn('codeet.notification requires a config');
+                    return;
+                }
+
+                config = {
+                    message: 'codeet-notification',
+                    data: config
+                };
+
+                instance.target.postMessage(config, self.config.codeetUrl);
 
             }
         };
